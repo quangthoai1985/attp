@@ -34,8 +34,87 @@ export interface Database {
                     role?: 'admin' | 'staff'
                     managed_area?: string | null
                     created_at?: string
-                    total_facilities: number
-                    active_count: number
+                    total_facilities?: number
+                    active_count?: number
+                }
+            }
+            facilities: {
+                Row: {
+                    id: string
+                    name: string
+                    address: string | null
+                    type: string
+                    province_code: string
+                    status: 'active' | 'inactive' | 'suspended'
+                    is_certified: boolean | null
+                    certificate_number: string | null
+                    certificate_expiry: string | null
+                    certificate_date: string | null
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    name: string
+                    address?: string | null
+                    type: string
+                    province_code: string
+                    status?: 'active' | 'inactive' | 'suspended'
+                    is_certified?: boolean | null
+                    certificate_number?: string | null
+                    certificate_expiry?: string | null
+                    certificate_date?: string | null
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    name?: string
+                    address?: string | null
+                    type?: string
+                    province_code?: string
+                    status?: 'active' | 'inactive' | 'suspended'
+                    is_certified?: boolean | null
+                    certificate_number?: string | null
+                    certificate_expiry?: string | null
+                    certificate_date?: string | null
+                    created_at?: string
+                    updated_at?: string
+                }
+            }
+            inspections: {
+                Row: {
+                    id: string
+                    facility_id: string
+                    inspection_date: string | null
+                    year: number
+                    batch: string | null
+                    result: 'passed' | 'failed' | 'pending' | null
+                    notes: string | null
+                    team_type: 'interdisciplinary' | 'specialized' | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    facility_id: string
+                    inspection_date?: string | null
+                    year: number
+                    batch?: string | null
+                    result?: 'passed' | 'failed' | 'pending' | null
+                    notes?: string | null
+                    team_type?: 'interdisciplinary' | 'specialized' | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    facility_id?: string
+                    inspection_date?: string | null
+                    year?: number
+                    batch?: string | null
+                    result?: 'passed' | 'failed' | 'pending' | null
+                    notes?: string | null
+                    team_type?: 'interdisciplinary' | 'specialized' | null
+                    created_at?: string
                 }
             }
             dashboard_facilities_by_type: {

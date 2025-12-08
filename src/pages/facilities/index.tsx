@@ -25,7 +25,7 @@ import { Badge } from "@/components/ui/badge"
 import { DataTable } from "@/components/ui/data-table"
 import { FacilityForm } from "@/features/facilities/components/FacilityForm"
 import { FacilityFormValues } from "@/schemas/facility"
-import { useAuth } from "@/hooks/useAuth"
+
 import { PageTransition } from "@/components/layout/PageTransition"
 
 // Type definition (matching Supabase Row)
@@ -40,7 +40,6 @@ type Facility = {
 }
 
 export default function FacilityList() {
-    const { user } = useAuth()
     const queryClient = useQueryClient()
     const [search, setSearch] = useState("")
     const [statusFilter, setStatusFilter] = useState<string>("all")
@@ -48,7 +47,7 @@ export default function FacilityList() {
     const [editingFacility, setEditingFacility] = useState<Facility | null>(null)
 
     // Data Fetching
-    const { data: facilities = [], isLoading } = useQuery({
+    const { data: facilities = [] } = useQuery({
         queryKey: ["facilities", search, statusFilter],
         queryFn: async () => {
             let query = supabase
