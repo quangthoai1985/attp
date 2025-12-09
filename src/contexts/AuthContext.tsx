@@ -4,9 +4,11 @@ import { supabase } from "@/lib/supabase"
 
 interface Profile {
     id: string
+    username: string | null
     full_name: string | null
     role: "admin" | "staff"
     managed_area: string | null
+    created_by: string | null
 }
 
 interface AuthContextType {
