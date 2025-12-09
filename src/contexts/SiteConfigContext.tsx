@@ -33,11 +33,21 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
     const loadConfig = async () => {
         try {
             // Try to load from Supabase first
+            // Try to load from Supabase first
+            // Explicitly cast the query to avoid "property does not exist on type 'never'" error
+            // This happens when TypeScript cannot infer the table schema correctly from the client
             const { data, error } = await supabase
                 .from('site_config')
                 .select('*')
                 .eq('id', 'main')
-                .single()
+                .single() as {
+                    data: {
+                        logo_url: string | null;
+                        logo_height: number | null;
+                        login_background_url: string | null
+                    } | null;
+                    error: any
+                }
 
             if (!error && data) {
                 setConfig({
@@ -93,7 +103,7 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
 
         // Save to Supabase
         try {
-            const { error } = await supabase.from('site_config').upsert({
+            const { error } = await (supabase.from('site_config') as any).upsert({
                 id: 'main',
                 logo_url: updatedConfig.logoUrl,
                 login_background_url: updatedConfig.loginBackgroundUrl,

@@ -8,39 +8,7 @@ import { Label } from "@/components/ui/label"
 import { PageTransition } from "@/components/layout/PageTransition"
 import { Settings, Image, Loader2, Check, X, RefreshCw, Upload, Info } from "lucide-react"
 
-// Helper to resize image
-const resizeImage = (file: File, maxWidth = 800): Promise<string> => {
-    return new Promise((resolve) => {
-        const reader = new FileReader()
-        reader.readAsDataURL(file)
-        reader.onload = (event) => {
-            const img = document.createElement("img")
-            img.src = event.target?.result as string
-            img.onload = () => {
-                const canvas = document.createElement("canvas")
-                let width = img.width
-                let height = img.height
 
-                // Calculate new dimensions
-                if (width > maxWidth) {
-                    height = (height * maxWidth) / width
-                    width = maxWidth
-                }
-
-                canvas.width = width
-                canvas.height = height
-                const ctx = canvas.getContext("2d")
-                if (ctx) {
-                    ctx.drawImage(img, 0, 0, width, height)
-                    // Use PNG for PNG files to preserve transparency, JPEG for others
-                    const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
-                    const quality = file.type === 'image/png' ? undefined : 0.7
-                    resolve(canvas.toDataURL(mimeType, quality))
-                }
-            }
-        }
-    })
-}
 
 export default function SettingsPage() {
     const { config, updateConfig, isLoading } = useSiteConfig()
