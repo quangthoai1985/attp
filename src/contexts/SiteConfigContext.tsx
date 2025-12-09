@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { supabase } from '@/lib/supabase'
 
 interface SiteConfig {
     logoUrl: string
@@ -24,24 +25,61 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
     const [config, setConfig] = useState<SiteConfig>(defaultConfig)
     const [isLoading, setIsLoading] = useState(true)
 
-    // Load config from localStorage on mount
+    // Load config from Supabase on mount
     useEffect(() => {
         loadConfig()
     }, [])
 
-    const loadConfig = () => {
+    const loadConfig = async () => {
         try {
-            const savedConfig = localStorage.getItem('siteConfig')
-            if (savedConfig) {
-                const parsed = JSON.parse(savedConfig)
+            // Try to load from Supabase first
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data, error } = await (supabase
+                .from('site_config') as any)
+                .select('*')
+                .eq('id', 'main')
+                .single()
+
+            if (!error && data) {
                 setConfig({
-                    logoUrl: parsed.logoUrl || defaultConfig.logoUrl,
-                    loginBackgroundUrl: parsed.loginBackgroundUrl || defaultConfig.loginBackgroundUrl,
-                    logoHeight: parsed.logoHeight || defaultConfig.logoHeight,
+                    logoUrl: data.logo_url || defaultConfig.logoUrl,
+                    loginBackgroundUrl: data.login_background_url || defaultConfig.loginBackgroundUrl,
+                    logoHeight: data.logo_height || defaultConfig.logoHeight,
                 })
+                // Also cache to localStorage for faster load
+                localStorage.setItem('siteConfig', JSON.stringify({
+                    logoUrl: data.logo_url,
+                    loginBackgroundUrl: data.login_background_url,
+                    logoHeight: data.logo_height,
+                }))
+            } else {
+                // Fallback to localStorage
+                const savedConfig = localStorage.getItem('siteConfig')
+                if (savedConfig) {
+                    const parsed = JSON.parse(savedConfig)
+                    setConfig({
+                        logoUrl: parsed.logoUrl || defaultConfig.logoUrl,
+                        loginBackgroundUrl: parsed.loginBackgroundUrl || defaultConfig.loginBackgroundUrl,
+                        logoHeight: parsed.logoHeight || defaultConfig.logoHeight,
+                    })
+                }
             }
         } catch (err) {
             console.error('Error loading site config:', err)
+            // Try localStorage fallback
+            try {
+                const savedConfig = localStorage.getItem('siteConfig')
+                if (savedConfig) {
+                    const parsed = JSON.parse(savedConfig)
+                    setConfig({
+                        logoUrl: parsed.logoUrl || defaultConfig.logoUrl,
+                        loginBackgroundUrl: parsed.loginBackgroundUrl || defaultConfig.loginBackgroundUrl,
+                        logoHeight: parsed.logoHeight || defaultConfig.logoHeight,
+                    })
+                }
+            } catch {
+                // Use defaults
+            }
         } finally {
             setIsLoading(false)
         }
@@ -51,8 +89,22 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
         const updatedConfig = { ...config, ...newConfig }
         setConfig(updatedConfig)
 
-        // Save to localStorage
+        // Save to localStorage immediately for fast access
         localStorage.setItem('siteConfig', JSON.stringify(updatedConfig))
+
+        // Save to Supabase
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (supabase.from('site_config') as any).upsert({
+                id: 'main',
+                logo_url: updatedConfig.logoUrl,
+                login_background_url: updatedConfig.loginBackgroundUrl,
+                logo_height: updatedConfig.logoHeight,
+                updated_at: new Date().toISOString()
+            })
+        } catch (err) {
+            console.error('Error saving site config to Supabase:', err)
+        }
     }
 
     return (
