@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Plus, Edit } from "lucide-react"
 import { Link } from "react-router-dom"
 
-import { supabase } from "@/lib/supabase"
+import { supabase, Database } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -28,16 +28,9 @@ import { FacilityFormValues } from "@/schemas/facility"
 
 import { PageTransition } from "@/components/layout/PageTransition"
 
-// Type definition (matching Supabase Row)
-type Facility = {
-    id: string
-    name: string
-    address: string | null
-    type: string
-    province_code: string
-    status: "active" | "inactive" | "suspended"
-    created_at: string
-}
+// Type definition (from Supabase schema)
+type Facility = Database['public']['Tables']['facilities']['Row']
+type FacilityInsert = Database['public']['Tables']['facilities']['Insert']
 
 export default function FacilityList() {
     const queryClient = useQueryClient()
@@ -76,14 +69,15 @@ export default function FacilityList() {
                 // Update
                 const { error } = await supabase
                     .from("facilities")
-                    .update(values)
+                    .update(values as never)
                     .eq("id", editingFacility.id)
                 if (error) throw error
             } else {
                 // Create
+                const insertData: FacilityInsert = values as FacilityInsert
                 const { error } = await supabase
                     .from("facilities")
-                    .insert(values)
+                    .insert(insertData as never)
                 if (error) throw error
             }
         },

@@ -34,10 +34,6 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
     columns,
     data,
-    pageCount, // Server-side pagination typically requires manual pageCount
-    pageSize = 10,
-    pageIndex = 0,
-    onPageChange,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([])
 

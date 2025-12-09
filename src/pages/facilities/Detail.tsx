@@ -2,7 +2,10 @@ import { useParams, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ArrowLeft, Loader2, Plus, Store } from "lucide-react"
 
-import { supabase } from "@/lib/supabase"
+import { supabase, Database } from "@/lib/supabase"
+
+type Facility = Database['public']['Tables']['facilities']['Row']
+type Inspection = Database['public']['Tables']['inspections']['Row']
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -27,9 +30,9 @@ export default function FacilityDetail() {
     const [isSheetOpen, setIsSheetOpen] = useState(false)
 
     // 1. Fetch Facility Info
-    const { data: facility, isLoading: loadingFacility } = useQuery({
+    const { data: facility, isLoading: loadingFacility } = useQuery<Facility | null>({
         queryKey: ["facility", id],
-        queryFn: async () => {
+        queryFn: async (): Promise<Facility | null> => {
             if (!id) throw new Error("ID not found")
             const { data, error } = await supabase
                 .from("facilities")
@@ -37,15 +40,15 @@ export default function FacilityDetail() {
                 .eq("id", id)
                 .single()
             if (error) throw error
-            return data
+            return data as Facility
         },
         enabled: !!id
     })
 
     // 2. Fetch Inspections
-    const { data: inspections = [], isLoading: loadingInspections } = useQuery({
+    const { data: inspections = [], isLoading: loadingInspections } = useQuery<Inspection[]>({
         queryKey: ["inspections", id],
-        queryFn: async () => {
+        queryFn: async (): Promise<Inspection[]> => {
             if (!id) throw new Error("ID not found")
             const { data, error } = await supabase
                 .from("inspections")
@@ -53,19 +56,21 @@ export default function FacilityDetail() {
                 .eq("facility_id", id)
                 .order("inspection_date", { ascending: false }) // Newest first
             if (error) throw error
-            return data
+            return data as Inspection[]
         },
         enabled: !!id
     })
 
     // 3. Mutation for Add Inspection
+    type InspectionInsert = Database['public']['Tables']['inspections']['Insert']
     const mutation = useMutation({
         mutationFn: async (values: InspectionFormValues) => {
             if (!id) throw new Error("No Facility ID")
-            const { error } = await supabase.from("inspections").insert({
+            const insertData: InspectionInsert = {
                 facility_id: id,
                 ...values,
-            })
+            }
+            const { error } = await supabase.from("inspections").insert(insertData as never)
             if (error) throw error
         },
         onSuccess: () => {

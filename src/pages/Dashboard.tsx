@@ -36,7 +36,7 @@ export default function Dashboard() {
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <div className="col-span-4">
-                    <ExpiringWidget facilities={data.expiringSoon} />
+                    <ExpiringWidget facilities={data.expiringSoon || []} />
                 </div>
             </div>
         </PageTransition>
