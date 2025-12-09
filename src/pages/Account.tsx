@@ -121,8 +121,9 @@ export default function AccountPage() {
         setLoadingAccounts(true)
         try {
             const data = await getAllUsers()
-            // Filter out current user
-            setSubAccounts((data || []).filter(acc => acc.id !== user?.id) as SubAccount[])
+            // Filter out current user - cast data for type safety
+            const accounts = (data || []) as SubAccount[]
+            setSubAccounts(accounts.filter(acc => acc.id !== user?.id))
         } catch (err) {
             console.error("Failed to load accounts:", err)
         } finally {
@@ -136,12 +137,14 @@ export default function AccountPage() {
         setProfileStatus('idle')
 
         try {
-            const { error } = await supabase
-                .from("profiles")
-                .update({
-                    full_name: fullName,
-                    username: username || null
-                })
+            const updateData = {
+                full_name: fullName,
+                username: username || null
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { error } = await (supabase
+                .from("profiles") as any)
+                .update(updateData)
                 .eq("id", user.id)
 
             if (error) throw error

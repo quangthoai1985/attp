@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient, SupabaseClient } from "@supabase/supabase-js"
 import { Database } from "./supabase"
 
 // Create admin client with service role key for privileged operations
@@ -6,7 +6,7 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const serviceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
 
 // Admin client - only use for admin operations (create users, change passwords)
-export const supabaseAdmin = serviceRoleKey
+export const supabaseAdmin: SupabaseClient<Database> | null = serviceRoleKey
     ? createClient<Database>(supabaseUrl || '', serviceRoleKey, {
         auth: {
             autoRefreshToken: false,
@@ -14,6 +14,14 @@ export const supabaseAdmin = serviceRoleKey
         }
     })
     : null
+
+// Helper to get admin client with proper typing
+function getAdminClient(): SupabaseClient<Database> {
+    if (!supabaseAdmin) {
+        throw new Error("Admin client not configured. Please add VITE_SUPABASE_SERVICE_ROLE_KEY to .env")
+    }
+    return supabaseAdmin
+}
 
 export interface CreateUserData {
     username: string
@@ -33,12 +41,10 @@ export interface UpdatePasswordData {
  * Create a new user account (Admin only)
  */
 export async function createUserAccount(data: CreateUserData, createdById: string) {
-    if (!supabaseAdmin) {
-        throw new Error("Admin client not configured. Please add VITE_SUPABASE_SERVICE_ROLE_KEY to .env")
-    }
+    const client = getAdminClient()
 
     // 1. Create auth user
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+    const { data: authData, error: authError } = await client.auth.admin.createUser({
         email: data.email,
         password: data.password,
         email_confirm: true, // Auto-confirm email
@@ -56,20 +62,22 @@ export async function createUserAccount(data: CreateUserData, createdById: strin
     }
 
     // 2. Create profile
-    const { error: profileError } = await supabaseAdmin
+    const profileData = {
+        id: authData.user.id,
+        username: data.username,
+        full_name: data.full_name,
+        role: data.role,
+        managed_area: data.managed_area || null,
+        created_by: createdById
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: profileError } = await client
         .from("profiles")
-        .upsert({
-            id: authData.user.id,
-            username: data.username,
-            full_name: data.full_name,
-            role: data.role,
-            managed_area: data.managed_area || null,
-            created_by: createdById
-        })
+        .insert(profileData as any)
 
     if (profileError) {
         // Rollback: delete auth user if profile creation fails
-        await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+        await client.auth.admin.deleteUser(authData.user.id)
         throw new Error(`Failed to create profile: ${profileError.message}`)
     }
 
@@ -80,11 +88,9 @@ export async function createUserAccount(data: CreateUserData, createdById: strin
  * Update user password (Admin only)
  */
 export async function updateUserPassword({ userId, newPassword }: UpdatePasswordData) {
-    if (!supabaseAdmin) {
-        throw new Error("Admin client not configured. Please add VITE_SUPABASE_SERVICE_ROLE_KEY to .env")
-    }
+    const client = getAdminClient()
 
-    const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+    const { error } = await client.auth.admin.updateUserById(userId, {
         password: newPassword
     })
 
@@ -99,11 +105,9 @@ export async function updateUserPassword({ userId, newPassword }: UpdatePassword
  * Get all sub-accounts created by a user
  */
 export async function getSubAccounts(parentUserId: string) {
-    if (!supabaseAdmin) {
-        throw new Error("Admin client not configured")
-    }
+    const client = getAdminClient()
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await client
         .from("profiles")
         .select("*")
         .eq("created_by", parentUserId)
@@ -120,11 +124,9 @@ export async function getSubAccounts(parentUserId: string) {
  * Get all users (Admin only)
  */
 export async function getAllUsers() {
-    if (!supabaseAdmin) {
-        throw new Error("Admin client not configured")
-    }
+    const client = getAdminClient()
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await client
         .from("profiles")
         .select("*")
         .order("created_at", { ascending: false })
@@ -140,19 +142,17 @@ export async function getAllUsers() {
  * Delete a user account (Admin only)
  */
 export async function deleteUserAccount(userId: string) {
-    if (!supabaseAdmin) {
-        throw new Error("Admin client not configured")
-    }
+    const client = getAdminClient()
 
     // Delete from auth (this will cascade to profile via trigger or we delete manually)
-    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+    const { error: authError } = await client.auth.admin.deleteUser(userId)
 
     if (authError) {
         throw new Error(`Failed to delete user: ${authError.message}`)
     }
 
     // Also delete profile explicitly
-    await supabaseAdmin.from("profiles").delete().eq("id", userId)
+    await client.from("profiles").delete().eq("id", userId)
 
     return true
 }
@@ -180,7 +180,9 @@ export async function lookupEmailByUsername(username: string): Promise<string | 
         return null
     }
 
-    const { data: profile } = await supabaseAdmin
+    const client = getAdminClient()
+
+    const { data: profile } = await client
         .from("profiles")
         .select("id")
         .eq("username", username)
@@ -189,7 +191,7 @@ export async function lookupEmailByUsername(username: string): Promise<string | 
     if (!profile) return null
 
     // Get email from auth
-    const { data: authData } = await supabaseAdmin.auth.admin.getUserById(profile.id)
+    const { data: authData } = await client.auth.admin.getUserById((profile as { id: string }).id)
 
     return authData?.user?.email || null
 }

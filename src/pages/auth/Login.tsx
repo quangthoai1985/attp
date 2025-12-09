@@ -33,8 +33,9 @@ export default function Login() {
         // If not an email format, try to lookup username
         if (!loginId.includes("@")) {
             try {
-                const { data: profile, error: lookupError } = await supabase
-                    .from("profiles")
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const { data: profile, error: lookupError } = await (supabase
+                    .from("profiles") as any)
                     .select("id, email")
                     .eq("username", loginId)
                     .single()

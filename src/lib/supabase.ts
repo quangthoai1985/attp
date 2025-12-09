@@ -26,6 +26,7 @@ export interface Database {
                 Insert: {
                     id: string
                     username?: string | null
+                    email?: string | null
                     full_name?: string | null
                     role?: 'admin' | 'staff'
                     managed_area?: string | null
@@ -36,6 +37,7 @@ export interface Database {
                 Update: {
                     id?: string
                     username?: string | null
+                    email?: string | null
                     full_name?: string | null
                     role?: 'admin' | 'staff'
                     managed_area?: string | null
