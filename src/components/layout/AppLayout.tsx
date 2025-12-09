@@ -6,7 +6,6 @@ import {
     Store,
     LogOut,
     User,
-    Settings,
     Menu,
     X
 } from "lucide-react"
@@ -115,11 +114,11 @@ export default function AppLayout() {
 
                     <div className="flex items-center gap-4">
                         <div className="text-sm text-right hidden sm:block">
-                            <p className="font-medium">{user?.full_name || "Admin User"}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{user?.role || "Admin"}</p>
+                            <p className="font-medium">{user?.user_metadata?.full_name || user?.email || "User"}</p>
+                            <p className="text-xs text-muted-foreground capitalize">{user?.role || "Staff"}</p>
                         </div>
                         <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20">
-                            {user?.full_name?.[0] || "U"}
+                            {user?.user_metadata?.full_name?.[0] || user?.email?.[0] || "U"}
                         </div>
                     </div>
                 </header>

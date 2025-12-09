@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui/badge"
 import { Database } from "@/lib/supabase"
-import { format } from "date-fns" // Optional but recommend using native date if date-fns not installed
 // Using native date formatting to avoid extra dependency for now unless user asked
 
 type Inspection = Database["public"]["Tables"]["inspections"]["Row"]
@@ -14,7 +13,7 @@ export function InspectionList({ inspections }: InspectionListProps) {
         return <div className="text-center py-8 text-muted-foreground">Chưa có lịch sử kiểm tra.</div>
     }
 
-    const getStatusBadge = (status: string) => {
+    const getStatusBadge = (status: string | null) => {
         switch (status) {
             case "passed":
                 return <Badge className="bg-green-600 hover:bg-green-700">Đạt</Badge>

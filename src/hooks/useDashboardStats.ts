@@ -1,22 +1,29 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
-import { startOfYear, endOfYear, addDays, isBefore, isAfter } from "date-fns"
+import { addDays, isBefore, isAfter } from "date-fns"
 
 export const useDashboardStats = () => {
     const { data, isLoading, error } = useQuery({
         queryKey: ["dashboard-stats"],
         queryFn: async () => {
             // 1. Fetch Facilities
-            const { data: facilities, error: facError } = await supabase
+            const { data: facilitiesData, error: facError } = await supabase
                 .from("facilities")
                 .select("*")
 
             if (facError) throw facError
 
+            // Explicit cast to avoid type inference issues
+            const facilities = facilitiesData as any[] | null
+
             // 2. Fetch Inspections
-            const { data: inspections, error: insError } = await supabase
+            const { data: inspectionsData, error: insError } = await supabase
                 .from("inspections")
                 .select("*")
+
+            if (insError) throw insError
+
+            const inspections = inspectionsData as any[] | null
 
             if (insError) throw insError
 
