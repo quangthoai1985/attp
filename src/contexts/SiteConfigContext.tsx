@@ -33,9 +33,8 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
     const loadConfig = async () => {
         try {
             // Try to load from Supabase first
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data, error } = await (supabase
-                .from('site_config') as any)
+            const { data, error } = await supabase
+                .from('site_config')
                 .select('*')
                 .eq('id', 'main')
                 .single()
@@ -94,14 +93,20 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
 
         // Save to Supabase
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (supabase.from('site_config') as any).upsert({
+            const { error } = await supabase.from('site_config').upsert({
                 id: 'main',
                 logo_url: updatedConfig.logoUrl,
                 login_background_url: updatedConfig.loginBackgroundUrl,
                 logo_height: updatedConfig.logoHeight,
                 updated_at: new Date().toISOString()
             })
+
+            if (error) {
+                console.error("DEBUG: Failed to save config to Supabase:", error)
+                // Optionally revert local state or notify user, but for now just log
+            } else {
+                console.log("DEBUG: Successfully saved config to Supabase")
+            }
         } catch (err) {
             console.error('Error saving site config to Supabase:', err)
         }

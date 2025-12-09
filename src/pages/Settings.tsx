@@ -80,51 +80,45 @@ export default function SettingsPage() {
 
         try {
             // 1. Try to resize first to optimize
-            const base64 = await resizeImage(file, type === 'logo' ? 400 : 1200)
+            // const base64 = await resizeImage(file, type === 'logo' ? 400 : 1200) // Removed unused base64
 
             // 2. Try to upload to Supabase Storage if configured
-            try {
-                const fileExt = file.name.split('.').pop()
-                const fileName = `${type}_${Date.now()}.${fileExt}`
-                const filePath = `settings/${fileName}`
+            const fileExt = file.name.split('.').pop()
+            const fileName = `${type}_${Date.now()}.${fileExt}`
+            const filePath = `settings/${fileName}`
 
-                const { data, error } = await supabase.storage
+            const { data, error } = await supabase.storage
+                .from('attp')
+                .upload(filePath, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                })
+
+            if (error) {
+                console.error("Supabase Upload Error:", error)
+                throw new Error("Upload failed: " + error.message)
+            }
+
+            if (data) {
+                const { data: { publicUrl } } = supabase.storage
                     .from('attp')
-                    .upload(filePath, file)
+                    .getPublicUrl(filePath)
 
-                if (!error && data) {
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('attp')
-                        .getPublicUrl(filePath)
-
-                    if (type === 'logo') {
-                        await updateConfig({ logoUrl: publicUrl })
-                        setTempLogo('') // Clear temp if direct save
-                    } else {
-                        await updateConfig({ loginBackgroundUrl: publicUrl })
-                        setTempBg('')
-                    }
-                    setSaveStatus('saved')
-                    setUploading(null)
-                    setTimeout(() => setSaveStatus('idle'), 2000)
-                    return // Exit if Supabase upload successful
+                if (type === 'logo') {
+                    await updateConfig({ logoUrl: publicUrl })
+                    setTempLogo('') // Clear temp if direct save
+                } else {
+                    await updateConfig({ loginBackgroundUrl: publicUrl })
+                    setTempBg('')
                 }
-            } catch (err) {
-                console.warn("Supabase storage upload failed, falling back to LocalStorage", err)
+                setSaveStatus('saved')
+                setUploading(null)
+                setTimeout(() => setSaveStatus('idle'), 2000)
             }
-
-            // 3. Fallback: Save Base64 to LocalStorage config
-            if (type === 'logo') {
-                await updateConfig({ logoUrl: base64 })
-            } else {
-                await updateConfig({ loginBackgroundUrl: base64 })
-            }
-
-            setSaveStatus('saved')
-            setTimeout(() => setSaveStatus('idle'), 2000)
 
         } catch (error) {
-            console.error(error)
+            console.error("Upload error:", error)
+            alert("Lỗi upload: Có thể do bucket 'attp' chưa được Public hoặc chưa có quyền ghi. Vui lòng kiểm tra Supabase Storage.")
             setSaveStatus('error')
             setTimeout(() => setSaveStatus('idle'), 3000)
         } finally {

@@ -131,6 +131,32 @@ export interface Database {
                     total: number
                 }
             }
+            site_config: {
+                Row: {
+                    id: string
+                    logo_url: string | null
+                    logo_height: number | null
+                    login_background_url: string | null
+                    updated_at: string | null
+                    updated_by: string | null
+                }
+                Insert: {
+                    id?: string
+                    logo_url?: string | null
+                    logo_height?: number | null
+                    login_background_url?: string | null
+                    updated_at?: string | null
+                    updated_by?: string | null
+                }
+                Update: {
+                    id?: string
+                    logo_url?: string | null
+                    logo_height?: number | null
+                    login_background_url?: string | null
+                    updated_at?: string | null
+                    updated_by?: string | null
+                }
+            }
         }
         Functions: {
             get_current_user_role: {
