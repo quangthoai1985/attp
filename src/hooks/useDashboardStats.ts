@@ -25,8 +25,6 @@ export const useDashboardStats = () => {
 
             const inspections = inspectionsData as any[] | null
 
-            if (insError) throw insError
-
             // Calculations
             const totalFacilities = facilities?.length || 0
             const today = new Date()
@@ -41,9 +39,6 @@ export const useDashboardStats = () => {
             const activeGCNCount = certifiedFacilities.length
 
             // Expired or Not Certified
-            // User requested: "Chưa cấp/Hết hạn". 
-            // - Not Certified: is_certified == false/null
-            // - Expired: is_certified == true AND expiry <= today
             const notCertifiedOrExpiredCount = facilities?.filter(f =>
                 !f.is_certified ||
                 (f.certificate_expiry && isBefore(new Date(f.certificate_expiry), today))
@@ -62,6 +57,24 @@ export const useDashboardStats = () => {
             const currentYear = today.getFullYear()
             const inspectionsThisYear = inspections?.filter(i => i.year === currentYear).length || 0
 
+            // New: Inspection statistics
+            const inspectionsByResult = {
+                dat: inspections?.filter(i => i.result === 'dat' || i.result === 'passed').length || 0,
+                cho_khac_phuc: inspections?.filter(i => i.result === 'cho_khac_phuc' || i.result === 'pending').length || 0,
+                da_khac_phuc: inspections?.filter(i => i.result === 'da_khac_phuc').length || 0,
+                khong_dat: inspections?.filter(i => i.result === 'khong_dat' || i.result === 'failed').length || 0,
+            }
+
+            // Total penalties
+            const totalPenalties = inspections?.reduce((sum, i) => {
+                if (i.has_penalty && i.penalty_amount) {
+                    return sum + Number(i.penalty_amount)
+                }
+                return sum
+            }, 0) || 0
+
+            const penaltyCount = inspections?.filter(i => i.has_penalty).length || 0
+
             // Data for Charts
 
             // Pie: By Type
@@ -72,18 +85,19 @@ export const useDashboardStats = () => {
 
             const pieChartData = Object.entries(typeStats).map(([name, value]) => ({ name, value }))
 
-            // Bar: Inspections by Result (per year or just filtered by current year/all time)
-            // Requirement: "Số lượng cơ sở đạt/không đạt qua các năm"
-            // Let's grouping by Year then Result
+            // Bar: Inspections by Result (per year)
             const barChartMap: Record<number, { year: number, passed: number, failed: number }> = {}
 
             inspections?.forEach(i => {
                 if (!barChartMap[i.year]) {
                     barChartMap[i.year] = { year: i.year, passed: 0, failed: 0 }
                 }
-                if (i.result === 'passed') barChartMap[i.year].passed++
-                if (i.result === 'failed') barChartMap[i.year].failed++
-                // pending ignored or added if needed
+                if (i.result === 'passed' || i.result === 'dat' || i.result === 'da_khac_phuc') {
+                    barChartMap[i.year].passed++
+                }
+                if (i.result === 'failed' || i.result === 'khong_dat') {
+                    barChartMap[i.year].failed++
+                }
             })
 
             const barChartData = Object.values(barChartMap).sort((a, b) => a.year - b.year)
@@ -93,7 +107,11 @@ export const useDashboardStats = () => {
                     totalFacilities,
                     activeGCNCount,
                     notCertifiedOrExpiredCount,
-                    inspectionsThisYear
+                    inspectionsThisYear,
+                    // New inspection stats
+                    inspectionsByResult,
+                    totalPenalties,
+                    penaltyCount,
                 },
                 charts: {
                     pie: pieChartData,
@@ -106,3 +124,4 @@ export const useDashboardStats = () => {
 
     return { data, isLoading, error }
 }
+

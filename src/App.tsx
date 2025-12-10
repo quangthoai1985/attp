@@ -6,6 +6,8 @@ import Dashboard from './pages/Dashboard'
 import Login from './pages/auth/Login'
 import FacilityList from './pages/facilities/index'
 import FacilityDetail from './pages/facilities/Detail'
+import FacilityTypes from './pages/FacilityTypes'
+import Inspections from './pages/Inspections'
 import Settings from './pages/Settings'
 import Account from './pages/Account'
 import AppLayout from './components/layout/AppLayout'
@@ -27,6 +29,8 @@ function App() {
                                     <Route path="/dashboard" element={<Dashboard />} />
                                     <Route path="/facilities" element={<FacilityList />} />
                                     <Route path="/facilities/:id" element={<FacilityDetail />} />
+                                    <Route path="/facility-types" element={<FacilityTypes />} />
+                                    <Route path="/inspections" element={<Inspections />} />
                                     <Route path="/account" element={<Account />} />
                                     <Route path="/settings" element={<Settings />} />
                                 </Route>
@@ -43,3 +47,4 @@ function App() {
 }
 
 export default App
+

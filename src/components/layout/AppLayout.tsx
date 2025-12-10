@@ -11,7 +11,9 @@ import {
     Menu,
     X,
     Settings,
-    ChevronDown
+    ChevronDown,
+    FolderOpen,
+    ClipboardCheck
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useEffect, useRef } from "react"
@@ -71,6 +73,8 @@ export default function AppLayout() {
     const navigation = [
         { name: "Tổng quan", href: "/dashboard", icon: LayoutDashboard },
         { name: "Cơ sở", href: "/facilities", icon: Store },
+        { name: "Loại hình", href: "/facility-types", icon: FolderOpen },
+        { name: "Thanh kiểm tra", href: "/inspections", icon: ClipboardCheck },
         { name: "Tài khoản", href: "/account", icon: User },
         { name: "Cấu hình", href: "/settings", icon: Settings },
     ]

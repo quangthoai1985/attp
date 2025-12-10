@@ -50,6 +50,7 @@ export interface Database {
                 Row: {
                     id: string
                     name: string
+                    owner_name: string | null
                     address: string | null
                     type: string
                     province_code: string
@@ -64,6 +65,7 @@ export interface Database {
                 Insert: {
                     id?: string
                     name: string
+                    owner_name?: string | null
                     address?: string | null
                     type: string
                     province_code: string
@@ -78,6 +80,7 @@ export interface Database {
                 Update: {
                     id?: string
                     name?: string
+                    owner_name?: string | null
                     address?: string | null
                     type?: string
                     province_code?: string
@@ -90,16 +93,46 @@ export interface Database {
                     updated_at?: string
                 }
             }
+            facility_types: {
+                Row: {
+                    id: string
+                    name: string
+                    description: string | null
+                    is_active: boolean
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    name: string
+                    description?: string | null
+                    is_active?: boolean
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    name?: string
+                    description?: string | null
+                    is_active?: boolean
+                    created_at?: string
+                    updated_at?: string
+                }
+            }
             inspections: {
                 Row: {
                     id: string
                     facility_id: string
                     inspection_date: string | null
                     year: number
-                    batch: string | null
-                    result: 'passed' | 'failed' | 'pending' | null
+                    team_type: 'chuyen_nganh' | 'lien_nganh'
+                    result: 'dat' | 'cho_khac_phuc' | 'da_khac_phuc' | 'khong_dat'
+                    remediation_deadline: string | null
+                    has_penalty: boolean
+                    penalty_amount: number | null
+                    penalty_agency: string | null
+                    sanction_type: string | null
                     notes: string | null
-                    team_type: 'interdisciplinary' | 'specialized' | null
                     created_at: string
                 }
                 Insert: {
@@ -107,10 +140,14 @@ export interface Database {
                     facility_id: string
                     inspection_date?: string | null
                     year: number
-                    batch?: string | null
-                    result?: 'passed' | 'failed' | 'pending' | null
+                    team_type: 'chuyen_nganh' | 'lien_nganh'
+                    result?: 'dat' | 'cho_khac_phuc' | 'da_khac_phuc' | 'khong_dat'
+                    remediation_deadline?: string | null
+                    has_penalty?: boolean
+                    penalty_amount?: number | null
+                    penalty_agency?: string | null
+                    sanction_type?: string | null
                     notes?: string | null
-                    team_type?: 'interdisciplinary' | 'specialized' | null
                     created_at?: string
                 }
                 Update: {
@@ -118,10 +155,14 @@ export interface Database {
                     facility_id?: string
                     inspection_date?: string | null
                     year?: number
-                    batch?: string | null
-                    result?: 'passed' | 'failed' | 'pending' | null
+                    team_type?: 'chuyen_nganh' | 'lien_nganh'
+                    result?: 'dat' | 'cho_khac_phuc' | 'da_khac_phuc' | 'khong_dat'
+                    remediation_deadline?: string | null
+                    has_penalty?: boolean
+                    penalty_amount?: number | null
+                    penalty_agency?: string | null
+                    sanction_type?: string | null
                     notes?: string | null
-                    team_type?: 'interdisciplinary' | 'specialized' | null
                     created_at?: string
                 }
             }
