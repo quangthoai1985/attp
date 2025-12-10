@@ -12,8 +12,11 @@ import {
     X,
     Settings,
     ChevronDown,
+    ChevronLeft,
+    ChevronRight,
     FolderOpen,
-    ClipboardCheck
+    ClipboardCheck,
+    Award
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useEffect, useRef } from "react"
@@ -75,12 +78,13 @@ export default function AppLayout() {
         { name: "Cơ sở", href: "/facilities", icon: Store },
         { name: "Loại hình", href: "/facility-types", icon: FolderOpen },
         { name: "Thanh kiểm tra", href: "/inspections", icon: ClipboardCheck },
+        { name: "Giấy CN", href: "/certificates", icon: Award },
         { name: "Tài khoản", href: "/account", icon: User },
         { name: "Cấu hình", href: "/settings", icon: Settings },
     ]
 
     return (
-        <div className="flex h-screen bg-background overflow-hidden">
+        <div className="flex h-screen bg-gradient-to-br from-slate-100 via-blue-50/50 to-indigo-100/30 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/30 overflow-hidden p-3 gap-3">
             {/* Mobile Menu Overlay */}
             <AnimatePresence>
                 {mobileMenuOpen && (
@@ -103,10 +107,10 @@ export default function AppLayout() {
                         animate={{ x: 0 }}
                         exit={{ x: -280 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="fixed left-0 top-0 bottom-0 w-[280px] bg-card border-r shadow-2xl z-50 flex flex-col md:hidden"
+                        className="fixed left-3 top-3 bottom-3 w-[280px] bg-white/80 dark:bg-slate-900/90 backdrop-blur-2xl rounded-2xl shadow-[0_8px_32px_rgba(99,102,241,0.15)] dark:shadow-[0_8px_32px_rgba(99,102,241,0.3)] border border-white/50 dark:border-slate-700/50 z-50 flex flex-col md:hidden overflow-hidden"
                     >
                         {/* Mobile Sidebar Header */}
-                        <div className="p-4 flex items-center justify-between border-b border-border/50">
+                        <div className="p-4 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50">
                             <div className="flex items-center gap-3">
                                 <img
                                     src={config.logoUrl}
@@ -121,7 +125,7 @@ export default function AppLayout() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="hover:bg-destructive/10 hover:text-destructive"
+                                className="hover:bg-destructive/10 hover:text-destructive rounded-xl"
                             >
                                 <X className="h-5 w-5" />
                             </Button>
@@ -143,8 +147,8 @@ export default function AppLayout() {
                                             className={cn(
                                                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
                                                 isActive
-                                                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                                                    : "hover:bg-accent text-muted-foreground hover:text-foreground"
+                                                    ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/30"
+                                                    : "hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                                             )}
                                         >
                                             <item.icon className="h-5 w-5" />
@@ -156,26 +160,26 @@ export default function AppLayout() {
                         </nav>
 
                         {/* Mobile User Info & Logout */}
-                        <div className="p-4 border-t border-border/50 space-y-3">
-                            <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-muted/50">
-                                <Avatar className="h-10 w-10 border border-primary/20">
+                        <div className="p-4 border-t border-slate-200/50 dark:border-slate-700/50 space-y-3">
+                            <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-slate-100/80 dark:bg-slate-800/50">
+                                <Avatar className="h-10 w-10 border-2 border-indigo-200 dark:border-indigo-800 shadow-md">
                                     <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name || "User"} />
-                                    <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                                    <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white font-bold">
                                         {user?.user_metadata?.full_name?.[0] || user?.email?.[0] || "U"}
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-sm truncate">
+                                    <p className="font-medium text-sm truncate text-slate-900 dark:text-slate-100">
                                         {user?.user_metadata?.full_name || user?.email || "User"}
                                     </p>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
                                         {getRoleLabel(profile?.role)}
                                     </p>
                                 </div>
                             </div>
                             <Button
                                 variant="ghost"
-                                className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl"
+                                className="w-full justify-start text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl"
                                 onClick={handleLogout}
                             >
                                 <LogOut className="h-5 w-5 mr-2" />
@@ -186,13 +190,29 @@ export default function AppLayout() {
                 )}
             </AnimatePresence>
 
-            {/* Desktop Sidebar */}
+            {/* Desktop Sidebar - Separated with rounded corners and colored shadow */}
             <motion.aside
                 initial={false}
                 animate={{ width: sidebarOpen ? 250 : 80 }}
-                className="hidden md:flex flex-col border-r bg-card/50 backdrop-blur-xl h-full shadow-sm z-20 relative"
+                className="hidden md:flex flex-col bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-2xl shadow-[0_8px_32px_rgba(99,102,241,0.12)] dark:shadow-[0_8px_32px_rgba(99,102,241,0.25)] border border-white/60 dark:border-slate-700/50 z-20 relative"
             >
-                <div className="relative p-2 border-b border-border/50 min-h-[60px] flex flex-col justify-center">
+                {/* Sidebar Toggle Button - Floating on the right edge */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className={cn(
+                        "absolute -right-3 top-6 z-30 h-6 w-6 rounded-full",
+                        "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700",
+                        "shadow-[0_2px_8px_rgba(99,102,241,0.2)] hover:shadow-[0_4px_12px_rgba(99,102,241,0.3)]",
+                        "text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400",
+                        "transition-all duration-300 hover:scale-110"
+                    )}
+                >
+                    {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </Button>
+
+                <div className="relative p-3 border-b border-slate-200/50 dark:border-slate-700/50 min-h-[60px] flex flex-col justify-center">
                     <AnimatePresence mode="wait">
                         {sidebarOpen ? (
                             <motion.div
@@ -216,7 +236,7 @@ export default function AppLayout() {
                                 <img
                                     src={config.logoUrl}
                                     alt="Logo"
-                                    className="h-10 w-10 rounded-lg object-cover"
+                                    className="h-10 w-10 rounded-xl object-cover shadow-md"
                                     onError={(e) => {
                                         (e.target as HTMLImageElement).src = 'https://placehold.co/40x40/6366f1/white?text=A'
                                     }}
@@ -224,17 +244,9 @@ export default function AppLayout() {
                             </div>
                         )}
                     </AnimatePresence>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className={cn("absolute top-2 right-2 text-muted-foreground hover:text-foreground", !sidebarOpen && "static mx-auto mt-2")}
-                    >
-                        {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-                    </Button>
                 </div>
 
-                <nav className="flex-1 p-4 space-y-2">
+                <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto">
                     {navigation.map((item) => {
                         const isActive = location.pathname.startsWith(item.href)
                         return (
@@ -242,13 +254,13 @@ export default function AppLayout() {
                                 key={item.name}
                                 to={item.href}
                                 className={cn(
-                                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative overflow-hidden",
+                                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
                                     isActive
-                                        ? "bg-primary text-primary-foreground shadow-md"
-                                        : "hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+                                        ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/25"
+                                        : "hover:bg-slate-100 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                                 )}
                             >
-                                <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive ? "text-primary-foreground" : "")} />
+                                <item.icon className={cn("h-5 w-5 flex-shrink-0 transition-transform group-hover:scale-110", isActive ? "text-white" : "")} />
                                 {sidebarOpen && (
                                     <motion.span
                                         initial={{ opacity: 0, x: -10 }}
@@ -267,24 +279,24 @@ export default function AppLayout() {
                 {/* Desktop Sidebar User Section - Removed, moved to header */}
             </motion.aside>
 
-            {/* Main Content */}
+            {/* Main Content Area - Separated with rounded corners and colored shadow */}
             <div className="flex-1 flex flex-col h-full relative overflow-hidden">
-                {/* Header */}
-                <header className="h-16 border-b border-primary-foreground/10 bg-primary sticky top-0 z-10 flex items-center justify-between px-4 md:px-6 shadow-lg">
+                {/* Header - Separated with rounded corners and colored shadow */}
+                <header className="h-16 bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-500 rounded-t-2xl shadow-[0_4px_20px_rgba(99,102,241,0.3)] flex items-center justify-between px-4 md:px-6 flex-shrink-0 relative z-10">
                     {/* Mobile Menu Button */}
                     <div className="flex items-center gap-3 md:hidden">
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => setMobileMenuOpen(true)}
-                            className="relative text-white hover:bg-white/10"
+                            className="relative text-white hover:bg-white/15 rounded-xl"
                         >
                             <Menu className="h-5 w-5" />
                         </Button>
                         <img
                             src={config.logoUrl}
                             alt="Logo"
-                            className="h-8 w-8 rounded-lg object-cover"
+                            className="h-8 w-8 rounded-lg object-cover shadow-md"
                             onError={(e) => {
                                 (e.target as HTMLImageElement).src = 'https://placehold.co/32x32/ffffff/6366f1?text=A'
                             }}
@@ -293,10 +305,10 @@ export default function AppLayout() {
 
                     {/* Header Title - Left aligned */}
                     <div className="flex-1 hidden sm:block">
-                        <h1 className="text-sm md:text-base font-display font-bold text-white tracking-wide">
+                        <h1 className="text-sm md:text-base font-display font-bold text-white tracking-wide drop-shadow-sm">
                             QUẢN LÝ AN TOÀN THỰC PHẨM
                         </h1>
-                        <p className="text-xs md:text-sm text-white/80 font-medium">
+                        <p className="text-xs md:text-sm text-white/85 font-medium">
                             TRUNG TÂM Y TẾ CHÂU ĐỐC
                         </p>
                     </div>
@@ -307,24 +319,24 @@ export default function AppLayout() {
                             onClick={() => setUserMenuOpen(!userMenuOpen)}
                             className={cn(
                                 "flex items-center gap-3 px-3 py-1.5 rounded-full transition-all duration-300",
-                                "bg-white/10 border border-white/20",
-                                "hover:bg-white/20 hover:border-white/40 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]",
+                                "bg-white/15 border border-white/25 backdrop-blur-sm",
+                                "hover:bg-white/25 hover:border-white/40 hover:shadow-[0_0_20px_rgba(255,255,255,0.25)]",
                                 "active:scale-95",
-                                userMenuOpen && "bg-white/25 shadow-[0_0_25px_rgba(255,255,255,0.4)]"
+                                userMenuOpen && "bg-white/30 shadow-[0_0_25px_rgba(255,255,255,0.35)]"
                             )}
                         >
                             <div className="text-sm text-right hidden sm:block">
-                                <p className="font-medium text-white">{user?.user_metadata?.full_name || user?.email || "User"}</p>
-                                <p className="text-xs text-white/70">{getRoleLabel(profile?.role)}</p>
+                                <p className="font-medium text-white drop-shadow-sm">{user?.user_metadata?.full_name || user?.email || "User"}</p>
+                                <p className="text-xs text-white/75">{getRoleLabel(profile?.role)}</p>
                             </div>
-                            <Avatar className="h-8 w-8 border border-white/40">
+                            <Avatar className="h-8 w-8 border-2 border-white/50 shadow-md">
                                 <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name || "User"} />
                                 <AvatarFallback className="bg-white/30 text-white font-bold text-sm backdrop-blur-sm">
                                     {user?.user_metadata?.full_name?.[0] || user?.email?.[0] || "U"}
                                 </AvatarFallback>
                             </Avatar>
                             <ChevronDown className={cn(
-                                "h-4 w-4 text-white/80 transition-transform duration-200 hidden sm:block",
+                                "h-4 w-4 text-white/85 transition-transform duration-200 hidden sm:block",
                                 userMenuOpen && "rotate-180"
                             )} />
                         </button>
@@ -337,22 +349,22 @@ export default function AppLayout() {
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                                     transition={{ duration: 0.15 }}
-                                    className="absolute right-0 mt-2 w-56 rounded-xl bg-card/95 backdrop-blur-xl border border-border/50 shadow-2xl overflow-hidden z-50"
+                                    className="absolute right-0 mt-2 w-56 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-[0_12px_40px_rgba(99,102,241,0.2)] overflow-hidden z-50"
                                 >
                                     {/* User Info Header */}
-                                    <div className="p-4 border-b border-border/50 bg-muted/30">
+                                    <div className="p-4 border-b border-slate-200/50 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/30">
                                         <div className="flex items-center gap-3">
-                                            <Avatar className="h-10 w-10 border border-primary/20">
+                                            <Avatar className="h-10 w-10 border-2 border-indigo-200 dark:border-indigo-800 shadow-md">
                                                 <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name || "User"} />
-                                                <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                                                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white font-bold">
                                                     {user?.user_metadata?.full_name?.[0] || user?.email?.[0] || "U"}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-sm truncate">
+                                                <p className="font-medium text-sm truncate text-slate-900 dark:text-slate-100">
                                                     {user?.user_metadata?.full_name || user?.email || "User"}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground">
+                                                <p className="text-xs text-slate-500 dark:text-slate-400">
                                                     {getRoleLabel(profile?.role)}
                                                 </p>
                                             </div>
@@ -364,9 +376,9 @@ export default function AppLayout() {
                                         <Link
                                             to="/account"
                                             onClick={() => setUserMenuOpen(false)}
-                                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
+                                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
                                         >
-                                            <Settings className="h-4 w-4 text-muted-foreground" />
+                                            <Settings className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                                             Cài đặt tài khoản
                                         </Link>
                                         <button
@@ -374,7 +386,7 @@ export default function AppLayout() {
                                                 setUserMenuOpen(false)
                                                 handleLogout()
                                             }}
-                                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
                                         >
                                             <LogOut className="h-4 w-4" />
                                             Đăng xuất
@@ -386,8 +398,8 @@ export default function AppLayout() {
                     </div>
                 </header>
 
-                {/* Content Area */}
-                <main className="flex-1 overflow-auto p-4 md:p-6 scroll-smooth">
+                {/* Content Area - Enhanced prominence, connected to header */}
+                <main className="flex-1 overflow-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-b-2xl shadow-[0_8px_40px_rgba(99,102,241,0.12),0_0_0_1px_rgba(255,255,255,0.8)] dark:shadow-[0_8px_40px_rgba(99,102,241,0.2)] border-x border-b border-white/80 dark:border-slate-700/50 p-4 md:p-6 scroll-smooth -mt-1">
                     <div className="max-w-7xl mx-auto h-full">
                         <Outlet />
                     </div>

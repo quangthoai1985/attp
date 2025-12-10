@@ -2,12 +2,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { SiteConfigProvider } from '@/contexts/SiteConfigContext'
+import { Toaster } from '@/components/ui/toaster'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/auth/Login'
 import FacilityList from './pages/facilities/index'
 import FacilityDetail from './pages/facilities/Detail'
 import FacilityTypes from './pages/FacilityTypes'
 import Inspections from './pages/Inspections'
+import Certificates from './pages/Certificates'
 import Settings from './pages/Settings'
 import Account from './pages/Account'
 import AppLayout from './components/layout/AppLayout'
@@ -31,6 +33,7 @@ function App() {
                                     <Route path="/facilities/:id" element={<FacilityDetail />} />
                                     <Route path="/facility-types" element={<FacilityTypes />} />
                                     <Route path="/inspections" element={<Inspections />} />
+                                    <Route path="/certificates" element={<Certificates />} />
                                     <Route path="/account" element={<Account />} />
                                     <Route path="/settings" element={<Settings />} />
                                 </Route>
@@ -40,6 +43,7 @@ function App() {
                             <Route path="*" element={<Navigate to="/dashboard" replace />} />
                         </Routes>
                     </Router>
+                    <Toaster />
                 </AuthProvider>
             </SiteConfigProvider>
         </QueryClientProvider>
@@ -47,4 +51,3 @@ function App() {
 }
 
 export default App
-

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ColumnDef } from "@tanstack/react-table"
-import { Plus, Edit, Trash2 } from "lucide-react"
+import { Plus, Edit, Trash2, FolderOpen } from "lucide-react"
 
 import { supabase, Database } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
@@ -231,10 +231,13 @@ export default function FacilityTypes() {
         <PageTransition className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                        Quản lý Loại hình
-                    </h2>
-                    <p className="text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                        <FolderOpen className="h-6 w-6 text-primary" />
+                        <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                            Quản lý Loại hình
+                        </h2>
+                    </div>
+                    <p className="text-muted-foreground mt-1">
                         Danh sách các loại hình cơ sở kinh doanh thực phẩm.
                     </p>
                 </div>

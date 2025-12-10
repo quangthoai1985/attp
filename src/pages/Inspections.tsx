@@ -215,6 +215,13 @@ export default function Inspections() {
             )
         },
         {
+            accessorKey: "owner_name",
+            header: "Chủ cơ sở",
+            cell: ({ row }) => (
+                <span className="text-sm">{row.getValue("owner_name") || "-"}</span>
+            )
+        },
+        {
             accessorKey: "address",
             header: "Địa chỉ",
             cell: ({ row }) => (
@@ -227,14 +234,11 @@ export default function Inspections() {
             accessorKey: "type",
             header: "Loại hình",
             cell: ({ row }) => (
-                <Badge variant="secondary">{row.getValue("type")}</Badge>
-            )
-        },
-        {
-            accessorKey: "owner_name",
-            header: "Chủ cơ sở",
-            cell: ({ row }) => (
-                <span className="text-sm">{row.getValue("owner_name") || "-"}</span>
+                <div className="max-w-[200px]">
+                    <span className="inline-block px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium border border-slate-200 dark:border-slate-700 leading-snug">
+                        {row.getValue("type")}
+                    </span>
+                </div>
             )
         },
         {

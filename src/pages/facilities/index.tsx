@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ColumnDef } from "@tanstack/react-table"
-import { Plus, Edit } from "lucide-react"
+import { Plus, Edit, Filter, Building2, Store } from "lucide-react"
 import { Link } from "react-router-dom"
 
 import { supabase, Database } from "@/lib/supabase"
@@ -31,17 +31,34 @@ import { PageTransition } from "@/components/layout/PageTransition"
 // Type definition (from Supabase schema)
 type Facility = Database['public']['Tables']['facilities']['Row']
 type FacilityInsert = Database['public']['Tables']['facilities']['Insert']
+type FacilityType = Database['public']['Tables']['facility_types']['Row']
 
 export default function FacilityList() {
     const queryClient = useQueryClient()
     const [search, setSearch] = useState("")
     const [statusFilter, setStatusFilter] = useState<string>("all")
+    const [managementLevelFilter, setManagementLevelFilter] = useState<string>("all")
+    const [facilityTypeFilter, setFacilityTypeFilter] = useState<string>("all")
     const [isOpen, setIsOpen] = useState(false)
     const [editingFacility, setEditingFacility] = useState<Facility | null>(null)
 
+    // Fetch facility types for filter
+    const { data: facilityTypes = [] } = useQuery({
+        queryKey: ["facility_types"],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from("facility_types")
+                .select("*")
+                .eq("is_active", true)
+                .order("name")
+            if (error) throw error
+            return data as FacilityType[]
+        }
+    })
+
     // Data Fetching
     const { data: facilities = [] } = useQuery({
-        queryKey: ["facilities", search, statusFilter],
+        queryKey: ["facilities", search, statusFilter, managementLevelFilter, facilityTypeFilter],
         queryFn: async () => {
             let query = supabase
                 .from("facilities")
@@ -54,6 +71,14 @@ export default function FacilityList() {
 
             if (statusFilter !== "all") {
                 query = query.eq("status", statusFilter)
+            }
+
+            if (managementLevelFilter !== "all") {
+                query = query.eq("province_code", managementLevelFilter)
+            }
+
+            if (facilityTypeFilter !== "all") {
+                query = query.eq("type", facilityTypeFilter)
             }
 
             const { data, error } = await query
@@ -117,12 +142,28 @@ export default function FacilityList() {
             )
         },
         {
+            accessorKey: "owner_name",
+            header: "Chủ cơ sở",
+            cell: ({ row }) => (
+                <span className="text-muted-foreground">
+                    {row.getValue("owner_name") || "-"}
+                </span>
+            )
+        },
+        {
             accessorKey: "address",
             header: "Địa chỉ",
         },
         {
             accessorKey: "type",
             header: "Loại hình",
+            cell: ({ row }) => (
+                <div className="max-w-[200px]">
+                    <span className="inline-block px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium border border-slate-200 dark:border-slate-700 leading-snug">
+                        {row.getValue("type")}
+                    </span>
+                </div>
+            )
         },
         {
             accessorKey: "status",
@@ -140,9 +181,11 @@ export default function FacilityList() {
                     suspended: "Đình chỉ",
                 }
                 return (
-                    <Badge variant={colorMap[status] || "outline"}>
-                        {labelMap[status] || status}
-                    </Badge>
+                    <div className="flex justify-center">
+                        <Badge variant={colorMap[status] || "outline"} className="whitespace-nowrap">
+                            {labelMap[status] || status}
+                        </Badge>
+                    </div>
                 )
             },
         },
@@ -162,8 +205,11 @@ export default function FacilityList() {
         <PageTransition className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">Quản lý Cơ sở</h2>
-                    <p className="text-muted-foreground">Danh sách cơ sở sản xuất kinh doanh.</p>
+                    <div className="flex items-center gap-2">
+                        <Store className="h-6 w-6 text-primary" />
+                        <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">Quản lý Cơ sở</h2>
+                    </div>
+                    <p className="text-muted-foreground mt-1">Danh sách cơ sở sản xuất kinh doanh.</p>
                 </div>
 
                 <Sheet open={isOpen} onOpenChange={(open) => {
@@ -192,19 +238,52 @@ export default function FacilityList() {
                 </Sheet>
             </div>
 
-            <div className="flex gap-4">
+            {/* Filters */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-center bg-card p-4 rounded-lg border shadow-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <Filter className="h-4 w-4" />
+                    <span className="text-sm font-medium">Bộ lọc:</span>
+                </div>
+
                 <Input
                     placeholder="Tìm kiếm theo tên..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="max-w-sm shadow-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="max-w-xs"
                 />
+
+                <Select value={managementLevelFilter} onValueChange={setManagementLevelFilter}>
+                    <SelectTrigger className="w-[180px]">
+                        <Building2 className="h-4 w-4 mr-2" />
+                        <SelectValue placeholder="Cấp quản lý" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Tất cả cấp</SelectItem>
+                        <SelectItem value="tinh">Cấp Tỉnh</SelectItem>
+                        <SelectItem value="huyen">Cấp Huyện</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Select value={facilityTypeFilter} onValueChange={setFacilityTypeFilter}>
+                    <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Loại hình" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Tất cả loại hình</SelectItem>
+                        {facilityTypes.map((type) => (
+                            <SelectItem key={type.id} value={type.name}>
+                                {type.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-[180px] shadow-sm">
+                    <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Trạng thái" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">Tất cả</SelectItem>
+                        <SelectItem value="all">Tất cả trạng thái</SelectItem>
                         <SelectItem value="active">Hoạt động</SelectItem>
                         <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
                         <SelectItem value="suspended">Tạm đình chỉ</SelectItem>

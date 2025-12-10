@@ -85,9 +85,16 @@ export function DataTable<TData, TValue>({
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
+                                    className="group relative transition-colors hover:bg-muted/50"
                                 >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                    {row.getVisibleCells().map((cell, index) => (
+                                        <TableCell key={cell.id} className={index === 0 ? "relative" : ""}>
+                                            {/* Accent bar on first cell */}
+                                            {index === 0 && (
+                                                <div className="absolute left-0 top-0 bottom-0 w-1 overflow-hidden">
+                                                    <div className="h-full w-full bg-gradient-to-b from-primary via-primary to-purple-500 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-200 origin-center" />
+                                                </div>
+                                            )}
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext()

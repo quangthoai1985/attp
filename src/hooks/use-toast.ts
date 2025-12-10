@@ -1,13 +1,13 @@
 import * as React from "react"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 5
+const TOAST_REMOVE_DELAY = 300
 
 type ToasterToast = {
     id: string
     title?: string
     description?: string
-    variant?: "default" | "destructive"
+    variant?: "default" | "destructive" | "success" | "warning" | "info"
 }
 
 const actionTypes = {
