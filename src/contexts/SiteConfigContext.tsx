@@ -30,6 +30,17 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
         loadConfig()
     }, [])
 
+    // Update favicon when logo changes
+    useEffect(() => {
+        if (config.logoUrl) {
+            const link: HTMLLinkElement = document.querySelector("link[rel*='icon']") || document.createElement('link')
+            link.type = 'image/x-icon'
+            link.rel = 'shortcut icon'
+            link.href = config.logoUrl
+            document.getElementsByTagName('head')[0].appendChild(link)
+        }
+    }, [config.logoUrl])
+
     const loadConfig = async () => {
         try {
             // Try to load from Supabase first
