@@ -104,7 +104,7 @@ export default function FacilityDetail() {
                 </div>
                 <div className="ml-auto">
                     <Badge variant={facility.status === 'active' ? 'default' : 'secondary'} className="text-sm px-3 py-1">
-                        {facility.status}
+                        {facility.status === 'active' ? 'Hoạt động' : facility.status}
                     </Badge>
                 </div>
             </div>
@@ -127,24 +127,36 @@ export default function FacilityDetail() {
                                     <span className="block text-lg font-medium">{facility.type}</span>
                                 </div>
                                 <div className="space-y-1">
-                                    <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Địa bàn (Mã)</span>
-                                    <span className="block text-lg font-medium">{facility.province_code}</span>
+                                    <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Cấp quản lý</span>
+                                    <span className="block text-lg font-medium">
+                                        {facility.province_code === 'huyen' ? 'HUYỆN' : facility.province_code === 'tinh' ? 'TỈNH' : facility.province_code}
+                                    </span>
                                 </div>
                                 <div className="space-y-1">
-                                    <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Ngày tạo</span>
-                                    <span className="block text-lg font-medium">{new Date(facility.created_at).toLocaleDateString("vi-VN")}</span>
+                                    <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Số GCN</span>
+                                    <span className="block text-lg font-medium">{facility.certificate_number || 'Chưa có'}</span>
                                 </div>
                                 <div className="space-y-1">
                                     <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Giấy chứng nhận</span>
-                                    <span className="block text-lg font-medium">
+                                    <div className="block text-lg font-medium">
                                         {facility.is_certified ? (
-                                            <span className="text-green-600 flex items-center gap-1">
-                                                Đã cấp ({facility.certificate_number}) - HH: {facility.certificate_expiry ? new Date(facility.certificate_expiry).toLocaleDateString("vi-VN") : "N/A"}
-                                            </span>
+                                            <div className="flex flex-col items-start gap-1">
+                                                <span className="text-green-600">
+                                                    Đã cấp ({facility.certificate_number})
+                                                </span>
+                                                <span className="flex items-center gap-2">
+                                                    <span className={facility.certificate_expiry && new Date(facility.certificate_expiry) < new Date() ? 'text-red-600' : 'text-muted-foreground'}>
+                                                        Hết Hạn: {facility.certificate_expiry ? new Date(facility.certificate_expiry).toLocaleDateString("vi-VN") : "N/A"}
+                                                    </span>
+                                                    {facility.certificate_expiry && new Date(facility.certificate_expiry) < new Date() && (
+                                                        <Badge variant="destructive" className="text-xs">Hết hạn</Badge>
+                                                    )}
+                                                </span>
+                                            </div>
                                         ) : (
                                             <span className="text-amber-600">Chưa cấp</span>
                                         )}
-                                    </span>
+                                    </div>
                                 </div>
                             </div>
                         </CardContent>
