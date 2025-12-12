@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ColumnDef } from "@tanstack/react-table"
-import { Plus, Edit, Filter, Building2, Store } from "lucide-react"
+import { Plus, Edit, Filter, Building2, Store, Upload } from "lucide-react"
 import { Link } from "react-router-dom"
 
 import { supabase, Database } from "@/lib/supabase"
@@ -24,6 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { DataTable } from "@/components/ui/data-table"
 import { FacilityForm } from "@/features/facilities/components/FacilityForm"
+import { FacilityImport } from "@/features/facilities/components/FacilityImport"
 import { FacilityFormValues } from "@/schemas/facility"
 
 import { PageTransition } from "@/components/layout/PageTransition"
@@ -40,6 +41,7 @@ export default function FacilityList() {
     const [managementLevelFilter, setManagementLevelFilter] = useState<string>("all")
     const [facilityTypeFilter, setFacilityTypeFilter] = useState<string>("all")
     const [isOpen, setIsOpen] = useState(false)
+    const [isImportOpen, setIsImportOpen] = useState(false)
     const [editingFacility, setEditingFacility] = useState<Facility | null>(null)
 
     // Fetch facility types for filter
@@ -212,30 +214,39 @@ export default function FacilityList() {
                     <p className="text-muted-foreground mt-1">Danh sách cơ sở sản xuất kinh doanh.</p>
                 </div>
 
-                <Sheet open={isOpen} onOpenChange={(open) => {
-                    setIsOpen(open)
-                    if (!open) setEditingFacility(null)
-                }}>
-                    <SheetTrigger asChild>
-                        <Button onClick={handleAddNew} className="shadow-lg hover:shadow-xl transition-all">
-                            <Plus className="mr-2 h-4 w-4" /> Thêm mới
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent className="sm:max-w-md overflow-y-auto">
-                        <SheetHeader>
-                            <SheetTitle>
-                                {editingFacility ? "Chỉnh sửa cơ sở" : "Thêm cơ sở mới"}
-                            </SheetTitle>
-                        </SheetHeader>
-                        <div className="py-6">
-                            <FacilityForm
-                                onSubmit={handleSubmit}
-                                loading={mutation.isPending}
-                                defaultValues={editingFacility || undefined}
-                            />
-                        </div>
-                    </SheetContent>
-                </Sheet>
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setIsImportOpen(true)}>
+                        <Upload className="mr-2 h-4 w-4" /> Import Excel
+                    </Button>
+
+                    <Sheet open={isOpen} onOpenChange={(open) => {
+                        setIsOpen(open)
+                        if (!open) setEditingFacility(null)
+                    }}>
+                        <SheetTrigger asChild>
+                            <Button onClick={handleAddNew} className="shadow-lg hover:shadow-xl transition-all">
+                                <Plus className="mr-2 h-4 w-4" /> Thêm mới
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent className="sm:max-w-md overflow-y-auto">
+                            <SheetHeader>
+                                <SheetTitle>
+                                    {editingFacility ? "Chỉnh sửa cơ sở" : "Thêm cơ sở mới"}
+                                </SheetTitle>
+                            </SheetHeader>
+                            <div className="py-6">
+                                <FacilityForm
+                                    onSubmit={handleSubmit}
+                                    loading={mutation.isPending}
+                                    defaultValues={editingFacility || undefined}
+                                />
+                            </div>
+                        </SheetContent>
+                    </Sheet>
+                </div>
+
+                {/* Import Dialog */}
+                <FacilityImport open={isImportOpen} onOpenChange={setIsImportOpen} />
             </div>
 
             {/* Filters */}
