@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft, Loader2, Plus, Store } from "lucide-react"
+import { ArrowLeft, Loader2, Plus, Store, MapPin } from "lucide-react"
 
 import { supabase, Database } from "@/lib/supabase"
 
@@ -16,18 +16,22 @@ import {
     SheetHeader,
     SheetTitle,
     SheetTrigger,
+    SheetDescription,
 } from "@/components/ui/sheet"
 import { InspectionList } from "@/features/inspections/components/InspectionList"
 import { InspectionForm } from "@/features/inspections/components/InspectionForm"
 import { InspectionFormValues } from "@/schemas/inspection"
 import { useState } from "react"
 import { PageTransition } from "@/components/layout/PageTransition"
+import { FacilityMap } from "@/features/facilities/components/FacilityMap"
+import { FacilityMapEditor } from "@/features/facilities/components/FacilityMapEditor"
 
 export default function FacilityDetail() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const [isSheetOpen, setIsSheetOpen] = useState(false)
+    const [isMapEditorOpen, setIsMapEditorOpen] = useState(false)
 
     // 1. Fetch Facility Info
     const { data: facility, isLoading: loadingFacility } = useQuery<Facility | null>({
@@ -159,6 +163,46 @@ export default function FacilityDetail() {
                                     </div>
                                 </div>
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Google Maps Section */}
+                    <Card className="shadow-lg border-t-4 border-t-green-500/20 mt-6">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <div>
+                                <CardTitle className="flex items-center gap-2">
+                                    <MapPin className="h-5 w-5 text-green-600" />
+                                    Vị trí trên bản đồ
+                                </CardTitle>
+                                <CardDescription>Click vào marker để xem thông tin chi tiết</CardDescription>
+                            </div>
+                            <Sheet open={isMapEditorOpen} onOpenChange={setIsMapEditorOpen}>
+                                <SheetTrigger asChild>
+                                    <Button variant="outline" size="sm">
+                                        <MapPin className="h-4 w-4 mr-2" />
+                                        Chỉnh sửa vị trí
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent className="sm:max-w-lg">
+                                    <SheetHeader>
+                                        <SheetTitle>Chỉnh sửa vị trí cơ sở</SheetTitle>
+                                        <SheetDescription>
+                                            Click vào bản đồ hoặc kéo thả marker để chọn vị trí mới cho cơ sở.
+                                        </SheetDescription>
+                                    </SheetHeader>
+                                    <div className="py-6">
+                                        <FacilityMapEditor
+                                            facilityId={facility.id}
+                                            initialLat={facility.latitude}
+                                            initialLng={facility.longitude}
+                                            onSave={() => setIsMapEditorOpen(false)}
+                                        />
+                                    </div>
+                                </SheetContent>
+                            </Sheet>
+                        </CardHeader>
+                        <CardContent>
+                            <FacilityMap facility={facility} height="350px" />
                         </CardContent>
                     </Card>
                 </TabsContent>
